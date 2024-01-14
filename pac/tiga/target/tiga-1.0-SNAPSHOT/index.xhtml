@@ -1,0 +1,137 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <!-- header -->
+    <h:head>
+        <title>Program Mini ATM</title>
+    </h:head>
+
+    <h:body>
+        <p:growl id="growl" globalOnly="true" showDetail="true" showSummary="true" />
+        <h:form id="mainForm">
+            <p:panel header="ACCOUNT">
+                <p:dataTable var="account" rowIndexVar="rowIndex" value="#{mainController.accounts}" rowKey="#{account.accountId}">
+                    <p:column headerText="No." width="40">
+                        <h:outputText value="#{rowIndex+1}"/>
+                    </p:column>
+                    <p:column headerText="No Rekening">
+                        <h:outputText value="#{account.accountId}"/>
+                    </p:column>
+                    <p:column headerText="Nama">
+                        <h:outputText value="#{account.name}"/>
+                    </p:column>
+                    <p:column headerText="Saldo">
+                        <h:outputLabel value="#{account.balance}">
+                            <f:convertNumber minFractionDigits="2" maxFractionDigits="2" />
+                        </h:outputLabel>
+                    </p:column>
+                    <p:column headerText="">
+                        <p:commandButton style="margin: 2px;" value="Tarik" update="@form :tarikForm" action="#{mainController.tarikTunai(account)}"/>
+                        <p:commandButton style="margin: 2px;" value="Setor" update="@form :setorForm" action="#{mainController.setorTunai(account)}"/>
+                        <p:commandButton style="margin: 2px;" value="Transfer" update="@form :transferForm" action="#{mainController.transfer(account)}"/>
+                    </p:column>
+                </p:dataTable>
+            </p:panel>
+            <br/>
+            <p:panel header="TRANSACTION LOG">
+                <p:dataTable var="log" rowIndexVar="rowIndex" value="#{mainController.transactions}" rowKey="#{log.id}"
+                     paginator="true"
+                     paginatorAlwaysVisible="false"
+                     paginatorPosition="bottom"
+                     rows="5">
+                    <p:column headerText="No." width="40">
+                        <h:outputText value="#{rowIndex+1}"/>
+                    </p:column>
+                    <p:column headerText="No Rekening">
+                        <h:outputText value="#{log.noRekening}"/>
+                    </p:column>
+                    <p:column headerText="Transaction Date">
+                        <h:outputText value="#{log.transactionDate}"/>
+                    </p:column>
+                    <p:column headerText="Transaksi">
+                        <h:outputText value="#{log.type}"/>
+                    </p:column>
+                    <p:column headerText="Debit/Kredit">
+                        <h:outputText value="#{log.debitCredit}"/>
+                    </p:column>
+                    <p:column headerText="Amount">
+                        <h:outputLabel value="#{log.amount}">
+                            <f:convertNumber minFractionDigits="2" maxFractionDigits="2" />
+                        </h:outputLabel>
+                    </p:column>
+                </p:dataTable>
+            </p:panel>
+        </h:form>
+
+        <h:form id="tarikForm">
+            <p:dialog header="Tarik Tunai Dialog" widgetVar="dlgTarik" minHeight="40" width="350" showEffect="fade">
+                <p class="m-0">Anda akan melakukan tarik tunai, Silahkan isi Nominal sesuai dengan kebutuhan anda pada form dibawah.</p>
+                    <div class="ui-fluid formgrid grid">
+                        <div class="field col-12 md:col-4">
+                            <p:outputLabel for="@next" value="Rekening Sumber" />
+                            <p:inputText id="rekeningTarik" value="#{mainController.selectedAccount.accountId.concat(' - ').concat(mainController.selectedAccount.name)}" readonly="true" />
+                        </div>
+                        <br/>
+                        <div class="field col-12 md:col-4">
+                            <p:outputLabel for="@next" value="Jumlah Tarik Tunai" />
+                            <p:inputNumber id="jumlahTarik" value="#{mainController.amount}" />
+                        </div>
+                    </div>
+                <f:facet name="footer">
+                    <p:commandButton type="button" value="No" onclick ="PF('dlgTarik').hide();" styleClass="ui-button-flat mr-2" style="width: 6rem" />
+                    <p:commandButton value="Yes" update="@form :growl :mainForm" action="#{mainController.doTarikTunai()}"/>
+                </f:facet>
+            </p:dialog>
+        </h:form>
+
+
+        <h:form id="setorForm">
+            <p:dialog header="Setor Tunai Dialog" widgetVar="dlgSetor" minHeight="40" width="350" showEffect="fade">
+                <p class="m-0">Anda akan melakukan setor tunai, Silahkan isi Nominal sesuai dengan kebutuhan anda pada form dibawah.</p>
+                <div class="ui-fluid formgrid grid">
+                    <div class="field col-12 md:col-4">
+                        <p:outputLabel for="@next" value="Nomor Rekening" />
+                        <p:inputText id="rekeningSetor" value="#{mainController.selectedAccount.accountId.concat(' - ').concat(mainController.selectedAccount.name)}" readonly="true" />
+                    </div>
+                    <br/>
+                    <div class="field col-12 md:col-4">
+                        <p:outputLabel for="@next" value="Jumlah Setor Tunai" />
+                        <p:inputNumber id="jumlahSetor" value="#{mainController.amount}" />
+                    </div>
+                </div>
+                <f:facet name="footer">
+                    <p:commandButton type="button" value="No" onclick ="PF('dlgSetor').hide();" styleClass="ui-button-flat mr-2" style="width: 6rem" />
+                    <p:commandButton value="Yes" update="@form :growl :mainForm" action="#{mainController.doSetorTunai()}"/>
+                </f:facet>
+            </p:dialog>
+        </h:form>
+
+        <h:form id="transferForm">
+            <p:dialog header="Transfer Dialog" widgetVar="dlgTransfer" minHeight="40" width="350" showEffect="fade">
+                <div class="ui-fluid formgrid grid">
+                    <div class="field col-12 md:col-4">
+                        <p:outputLabel for="@next" value="Nomor Rekening Sumber" />
+                        <p:inputText id="rekeningSumber" value="#{mainController.selectedAccount.accountId.concat(' - ').concat(mainController.selectedAccount.name)}" readonly="true" />
+                    </div>
+                    <div class="field col-12 md:col-4">
+                        <p:outputLabel for="@next" value="Nomor Rekening Tujuan" />
+                        <p:selectOneMenu value="#{mainController.beneficiaryAccountId}">
+                            <f:selectItems value="#{mainController.beneficiaryAccounts}" var="beneficiary"
+                                           itemLabel="#{beneficiary.accountId.concat(' - ').concat(beneficiary.name)}" itemValue="#{beneficiary.accountId}"/>
+                        </p:selectOneMenu>
+                    </div>
+                    <div class="field col-12 md:col-4">
+                        <p:outputLabel for="@next" value="Jumlah Transfer" />
+                        <p:inputNumber id="jumlahTransfer" value="#{mainController.amount}" />
+                    </div>
+                </div>
+                <f:facet name="footer">
+                    <p:commandButton type="button" value="No" onclick ="PF('dlgTransfer').hide();" styleClass="ui-button-flat mr-2" style="width: 6rem" />
+                    <p:commandButton value="Yes" update="@form :growl :mainForm" action="#{mainController.doTransfer()}"/>
+                </f:facet>
+            </p:dialog>
+        </h:form>
+    </h:body>
+</html>
