@@ -1,1 +1,0 @@
-Silahkan download pada link berikut : https://drive.google.com/file/d/1UyRJD8Xbz-Rj9y_OWXrBee7Ow49KBQP_/view?usp=sharing
